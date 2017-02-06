@@ -1,46 +1,55 @@
 import requests
-import json
 import click
 API_URL = "http://fanyi.youdao.com/openapi.do?keyfrom=ydd-dict&key=1890264650&type=data&doctype=json&version=1.1"
-s = """{"basic": {"explains": ["[试验] test", "measurement"], "phonetic": "cè shì"}, "query": "测试", "web": [{"key": "测试",
-"value": ["Test", "test", "TST test"]}, {"key": "集成测试", "value": ["Integration testing", "Test d'intégration", "통합 시험"]},
-{"key": "ANOVA测试", "value": ["Gage R&amp;R", "ANOVA gauge R&amp;R"]}], "translation": ["test"], "errorCode": 0}"""
+
+def show_basic(s):
+    basic = s["basic"]
+    phonetic = ''
+    if "phonetic" in basic:
+        phonetic = '发音 {}'.format(basic["phonetic"])
+    if "us-phonetic" in basic:
+        phonetic += " 美式发言 {}".format(basic["us-phonetic"])
+    if phonetic:
+        click.secho(phonetic, fg='red')
+    for explain in basic["explains"]:
+        click.secho(explain, fg='blue')
+
+def show_web(s):
+    click.secho("#" * 8, fg="green")
+    click.secho("短语", fg="green")
+    web = s["web"]
+    for item in web:
+        click.secho("{} : {}".format(item["key"], '; '.join(item["value"])), fg='green')
+
 def show_result(s):
     error_code = s["errorCode"]
     if error_code == 0:
-        print(s["translation"])
+        click.secho(' '.join(s["translation"]), fg='red')
         if "basic" in s:
-            print(s["basic"])
-        # click.secho('Hello %s!' % "test", fg='red', underline=True)
+            show_basic(s)
+        if "web" in s:
+            show_web(s)
     elif error_code == 20:
-        print('too long text(要翻译的文本过长)')
+        click.secho('too long text(要翻译的文本过长)', fg='red')
     elif error_code == 30:
-        print("can't tranlate text(无法进行有效的翻译)")
+        click.secho("can't tranlate text(无法进行有效的翻译)", fg='red')
     elif error_code == 40:
-        print("unsupport language(不支持的语言类型)")
+        click.secho("unsupport language(不支持的语言类型)", fg='red')
     elif error_code == 50:
-        print("useless api key(无效的key)")
+        click.secho("useless api key(无效的key)", fg='red')
     else:
-        print("no result(无词典结果)")
+        click.secho("no result(无词典结果)", fg='red')
 
 def get_response_json(query):
     params = {"q": query}
     response = requests.get(API_URL, params=params)
     data = response.json()
-    print(data)
     return data
-
-# s = json.loads(s)
-# print(s)
-# show_result(s)
-
 
 @click.command()
 @click.argument('words', nargs=-1)
 def tranlate(words):
     query = ' '.join(words)
-    print(query)
-    """Simple program that greets NAME for a total of COUNT times."""
     result = get_response_json(query)
     show_result(result)
 
