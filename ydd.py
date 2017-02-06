@@ -8,7 +8,7 @@ def show_basic(s):
     if "phonetic" in basic:
         phonetic = '发音 {}'.format(basic["phonetic"])
     if "us-phonetic" in basic:
-        phonetic += " 美式发言 {}".format(basic["us-phonetic"])
+        phonetic += " 美式发音 {}".format(basic["us-phonetic"])
     if phonetic:
         click.secho(phonetic, fg='red')
     for explain in basic["explains"]:
@@ -48,10 +48,10 @@ def get_response_json(query):
 
 @click.command()
 @click.argument('words', nargs=-1)
-def tranlate(words):
+def translate(words):
     query = ' '.join(words)
     result = get_response_json(query)
     show_result(result)
 
 if __name__ == '__main__':
-    tranlate()
+    translate()
