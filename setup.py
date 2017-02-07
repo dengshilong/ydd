@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='ydd',
-    version='0.1',
+    version='0.2',
     author='dengshilong',
     author_email='dengshilong1988@gmail.com',
-    description="python youdao dict terminal",
-    keywords="python youdao dict terminal",
+    description="youdao dict terminal",
+    keywords="youdao dict terminal",
     url='https://github.com/dengshilong/ydd',
     zip_safe=False,
     py_modules=['ydd'],
