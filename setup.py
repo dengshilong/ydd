@@ -14,6 +14,7 @@ setup(
         'Click',
         'colorama',
         'requests',
+        'six',
     ],
     entry_points={
         "console_scripts": [
