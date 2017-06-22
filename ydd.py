@@ -1,4 +1,5 @@
 #coding: utf-8
+import commands
 import requests
 import click
 import six
@@ -39,6 +40,7 @@ def show_result(s):
             show_basic(s)
         if "web" in s:
             show_web(s)
+        save_history(s)
     elif error_code == 20:
         click.secho('too long text(要翻译的文本过长)', fg='red')
     elif error_code == 30:
@@ -56,13 +58,26 @@ def get_response_json(query):
     data = response.json()
     return data
 
+def save_history(s):
+    key = s["query"]
+    explain = ' '.join(s["translation"])
+    line = key + ' ' + explain + '\n'
+    print line
+    with open('history.txt', 'a+') as f:
+        f.writelines(line.encode('utf-8'))
+
 @click.command()
+@click.option('--n', default=10, type=int)
 @click.argument('words', nargs=-1)
-def translate(words):
+
+def translate(n, words):
     if not words:
         click.secho("enter words(请输入单词)", fg='red')
         return
     query = ' '.join(words)
+    if query == 'list':
+        click.secho(commands.getoutput('tail -n %s history.txt' % n))
+        return
     result = get_response_json(query)
     show_result(result)
 
