@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ydd',
-    version='0.2',
+    version='0.3',
     author='dengshilong',
     author_email='dengshilong1988@gmail.com',
     description="youdao dict terminal",
@@ -15,10 +15,11 @@ setup(
         'colorama',
         'requests',
         'six',
+        'click-default-group',
     ],
     entry_points={
         "console_scripts": [
-            "ydd=ydd:translate",
+            "ydd=ydd:cli",
         ]
     },
 )
