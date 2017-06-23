@@ -3,6 +3,8 @@ import commands
 import requests
 import click
 import six
+from click_default_group import DefaultGroup
+
 API_URL = "http://fanyi.youdao.com/openapi.do?keyfrom=ydd-dict&key=1890264650&type=data&doctype=json&version=1.1"
 
 def show_basic(s):
@@ -66,20 +68,28 @@ def save_history(s):
     with open('history.txt', 'a+') as f:
         f.writelines(line.encode('utf-8'))
 
-@click.command()
-@click.option('--n', default=10, type=int)
-@click.argument('words', nargs=-1)
+@click.group(cls=DefaultGroup, default='translate')
+def cli():
+    pass
 
-def translate(n, words):
+@cli.command(help='query and translate words')
+@click.argument('words', nargs=-1)
+def translate(words):
     if not words:
         click.secho("enter words(请输入单词)", fg='red')
         return
     query = ' '.join(words)
-    if query == 'list':
-        click.secho(commands.getoutput('tail -n %s history.txt' % n))
-        return
     result = get_response_json(query)
     show_result(result)
 
+@cli.command(help='show query history')
+@click.option('--d', is_flag=True, help='clear history')
+def history(d):
+    if d:
+        click.secho(commands.getoutput('rm history.txt'))
+        return
+    click.secho(commands.getoutput('cat history.txt'))
+
+
 if __name__ == '__main__':
-    translate()
+    cli()
