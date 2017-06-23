@@ -1,5 +1,6 @@
 #coding: utf-8
-import commands
+import os
+import subprocess
 import requests
 import click
 import six
@@ -64,9 +65,11 @@ def save_history(s):
     key = s["query"]
     explain = ' '.join(s["translation"])
     line = key + ' ' + explain + '\n'
-    print line
     with open('history.txt', 'a+') as f:
-        f.writelines(line.encode('utf-8'))
+        if six.PY3:
+            f.write(line)
+        else:
+            f.write(line.encode('utf-8'))
 
 @click.group(cls=DefaultGroup, default='translate')
 def cli():
@@ -85,11 +88,13 @@ def translate(words):
 @cli.command(help='show query history')
 @click.option('--d', is_flag=True, help='clear history')
 def history(d):
-    if d:
-        click.secho(commands.getoutput('rm history.txt'))
+    exist = os.path.exists("history.txt")
+    if not exist:
         return
-    click.secho(commands.getoutput('cat history.txt'))
-
+    if d:
+        subprocess.call("rm history.txt", shell=True)
+        return
+    subprocess.call("cat history.txt", shell=True)
 
 if __name__ == '__main__':
     cli()
