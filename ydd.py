@@ -1,7 +1,11 @@
 #coding: utf-8
+import os
+import subprocess
 import requests
 import click
 import six
+from click_default_group import DefaultGroup
+
 API_URL = "http://fanyi.youdao.com/openapi.do?keyfrom=ydd-dict&key=1890264650&type=data&doctype=json&version=1.1"
 
 def show_basic(s):
@@ -39,6 +43,7 @@ def show_result(s):
             show_basic(s)
         if "web" in s:
             show_web(s)
+        save_history(s)
     elif error_code == 20:
         click.secho('too long text(要翻译的文本过长)', fg='red')
     elif error_code == 30:
@@ -56,7 +61,21 @@ def get_response_json(query):
     data = response.json()
     return data
 
-@click.command()
+def save_history(s):
+    key = s["query"]
+    explain = ' '.join(s["translation"])
+    line = key + ' ' + explain + '\n'
+    with open('history.txt', 'a+') as f:
+        if six.PY3:
+            f.write(line)
+        else:
+            f.write(line.encode('utf-8'))
+
+@click.group(cls=DefaultGroup, default='translate')
+def cli():
+    pass
+
+@cli.command(help='query and translate words')
 @click.argument('words', nargs=-1)
 def translate(words):
     if not words:
@@ -66,5 +85,16 @@ def translate(words):
     result = get_response_json(query)
     show_result(result)
 
+@cli.command(help='show query history')
+@click.option('--d', is_flag=True, help='clear history')
+def history(d):
+    exist = os.path.exists("history.txt")
+    if not exist:
+        return
+    if d:
+        subprocess.call("rm history.txt", shell=True)
+        return
+    subprocess.call("cat history.txt", shell=True)
+
 if __name__ == '__main__':
-    translate()
+    cli()
