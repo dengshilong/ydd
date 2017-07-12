@@ -8,6 +8,9 @@ from click_default_group import DefaultGroup
 
 API_URL = "http://fanyi.youdao.com/openapi.do?keyfrom=ydd-dict&key=1890264650&type=data&doctype=json&version=1.1"
 
+HISTORY_PATH = os.environ['HOME'] + "/.ydd_history.txt"
+
+
 def show_basic(s):
     basic = s["basic"]
     phonetic = ''
@@ -65,7 +68,7 @@ def save_history(s):
     key = s["query"]
     explain = ' '.join(s["translation"])
     line = key + ' ' + explain + '\n'
-    with open('history.txt', 'a+') as f:
+    with open(HISTORY_PATH, 'a+') as f:
         if six.PY3:
             f.write(line)
         else:
@@ -88,13 +91,13 @@ def translate(words):
 @cli.command(help='show query history')
 @click.option('--d', is_flag=True, help='clear history')
 def history(d):
-    exist = os.path.exists("history.txt")
+    exist = os.path.exists(HISTORY_PATH)
     if not exist:
         return
     if d:
-        subprocess.call("rm history.txt", shell=True)
+        subprocess.call("rm %s" % HISTORY_PATH, shell=True)
         return
-    subprocess.call("cat history.txt", shell=True)
+    subprocess.call("cat %s" % HISTORY_PATH, shell=True)
 
 if __name__ == '__main__':
     cli()
